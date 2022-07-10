@@ -23,6 +23,26 @@ namespace COMP2084LAB1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddAuthentication()
+               .AddMicrosoftAccount(microsoftOptions =>
+               {
+                   microsoftOptions.ClientId = Configuration.GetSection("Authentication:Microsoft")["ClientId"];
+                   microsoftOptions.ClientSecret = Configuration.GetSection("Authentication:Microsoft")["ClientSecret"];
+               })
+               .AddGoogle(options =>
+               {
+                   options.ClientId = Configuration.GetSection("Authentication:Google")["ClientId"];
+                   options.ClientSecret = Configuration.GetSection
+                   ("Authentication:Google")["ClientSecret"];
+               });
+            services.AddSession();
+
             services.AddControllersWithViews();
         }
 
